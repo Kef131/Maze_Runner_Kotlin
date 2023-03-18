@@ -1,5 +1,7 @@
 package mazerunner
 
+import java.lang.Math.abs
+
 class Maze {
     //Creating empty two-dimensional array
     val maze = Array(10) { Array(10) { 1 } }
@@ -18,10 +20,51 @@ class Maze {
         maze[entrance][0] = 0
         maze[exit][9] = 0
         //Create passages
-        correctPassageSimple(entrance, exit)
+        createComplexCorrectPassage(entrance, 1, exit, 8)
         createRandomPassages(entrance, 1)
 
     }
+
+    // Create a more complex passage from entrance to exit
+    fun createComplexCorrectPassage(row: Int, col: Int, targetRow: Int, targetCol: Int) {
+        // Base case: Stop when the function reaches the exit position
+        if (row == targetRow && col == targetCol) {
+            return
+        }
+
+        // Calculate the row and column differences between the current position and the exit position
+        val rowDiff = targetRow - row
+        val colDiff = targetCol - col
+
+        // Determine which directions are available to move closer to the exit
+        val availableDirections = mutableListOf<Pair<Int, Int>>()
+        if (rowDiff != 0) {
+            availableDirections.add(Pair(rowDiff / abs(rowDiff), 0))
+        }
+        if (colDiff != 0) {
+            availableDirections.add(Pair(0, colDiff / abs(colDiff)))
+        }
+
+        // Shuffle the available directions to randomize the order in which the function explores the maze
+        val shuffledDirections = availableDirections.shuffled()
+
+        // Iterate through each direction in the shuffled directions list
+        for (dir in shuffledDirections) {
+            // Calculate the new position in the maze by adding the row and column changes to the current position
+            val newRow = row + dir.first
+            val newCol = col + dir.second
+
+            // Check if the new position is within the maze boundaries and if the new position is a wall
+            if (newRow in 1..8 && newCol in 1..8 && maze[newRow][newCol] == 1) {
+                // Set the new position cell as a passage
+                maze[newRow][newCol] = 0
+                // Call the createComplexPassage function recursively with the new position as the current position
+                createComplexCorrectPassage(newRow, newCol, targetRow, targetCol)
+                break
+            }
+        }
+    }
+
 
     // Create random passages to avoid 3x3 wall blocks and make all empty cells accessible
     fun createRandomPassages(row: Int, col: Int) {
