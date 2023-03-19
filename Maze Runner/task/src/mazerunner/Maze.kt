@@ -19,13 +19,15 @@ class Maze {
         val exit = (1..8).random()
         maze[entrance][0] = 0
         maze[exit][9] = 0
+        // Set the first wall block in the entrance as a passage
+        maze[entrance][1] = 0
         //Create passages
         createComplexCorrectPassage(entrance, 1, exit, 8)
         createRandomPassages(entrance, 1)
 
     }
 
-    // Create a more complex passage from entrance to exit
+    // Create a more complex passage from entrance to exit, ocassionally creates very simples passages to the exit
     fun createComplexCorrectPassage(row: Int, col: Int, targetRow: Int, targetCol: Int) {
         // Base case: Stop when the function reaches the exit position
         if (row == targetRow && col == targetCol) {
@@ -36,7 +38,16 @@ class Maze {
         val rowDiff = targetRow - row
         val colDiff = targetCol - col
 
-        // Determine which directions are available to move closer to the exit
+        /*
+        The row and column differences are calculated to determine the direction in which the current position
+        should move to get closer to the exit. The difference helps decide whether the function should
+        move up/down (change in row) or left/right (change in column) to create a passage towards the exit.
+        The direction is determined by checking if the row/column difference is positive or negative.
+         If the difference is positive, the function should move up or right.
+         If the difference is negative, the function should move down or left.
+         If the difference is 0, the function should not move in that direction.
+        */
+        //Determine which directions are available to move closer to the exit
         val availableDirections = mutableListOf<Pair<Int, Int>>()
         if (rowDiff != 0) {
             availableDirections.add(Pair(rowDiff / abs(rowDiff), 0))
@@ -66,7 +77,8 @@ class Maze {
     }
 
 
-    // Create random passages to avoid 3x3 wall blocks and make all empty cells accessible
+    // Create random passages to avoid 3x3 wall blocks and make all empty cells accessible, is it possibe to create
+    // 3x3 wall blocks with this function. It is also possible to create 2x2 passage blocks
     fun createRandomPassages(row: Int, col: Int) {
         // Shuffle the directions list to randomize the order in which the function explores the maze
         val shuffledDirections = directions.shuffled()
@@ -87,40 +99,6 @@ class Maze {
                 // Call the createRandomPassages function recursively with the new position as the current position
                 createRandomPassages(newRow, newCol)
             }
-        }
-    }
-
-
-    private fun createEmptyPassages3x3(entrance: Int, i: Int) {
-        for (i in 1..8) {
-            for (j in 1..8) {
-                //verify if the current block as all the 8 surrounding blocks as walls
-                if (maze[i][j] == 1 && maze[i - 1][j] == 1 && maze[i + 1][j] == 1 && maze[i][j - 1] == 1 && maze[i][j + 1] == 1 && maze[i - 1][j - 1] == 1 && maze[i - 1][j + 1] == 1 && maze[i + 1][j - 1] == 1 && maze[i + 1][j + 1] == 1) {
-                    maze[i][j] = 0
-                }
-
-            }
-        }
-
-    }
-
-    //correct passage to exit
-    fun correctPassageSimple(entrance: Int, exit: Int) {
-        //horizontal passage from entrance
-        for (i in 1..8) {
-            maze[entrance][i] = 0
-        }
-
-        //vertical passage to exit
-        if (exit > entrance) { // exit is above entrance
-            for (i in entrance..exit) {
-                maze[i][8] = 0
-            }
-        } else { // exit is below entrance
-            for (i in exit..entrance) {
-                maze[i][8] = 0
-            }
-
         }
     }
 
